@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -11,14 +10,17 @@ public class ResolutionManager : MonoBehaviour
     private List<Resolution> filteredResolutions;
 
     private double currentRefreshRate;
-    private int currentResolutionIndex = 0;
     void Awake()
     {
-       
+        //Almaceno todas las resoluciones disponibles por el monitor
         resolutions = Screen.resolutions;
         filteredResolutions = new List<Resolution>();
+        //Eliminamos los valores por defecto del dropdown
         resolutionDropdown.ClearOptions();
+        //Almacenamos el valor de la tasa de refresco del monitor para filtrar las resoluciones a esa tasa de refresco
         currentRefreshRate = Screen.currentResolution.refreshRateRatio.value;
+        Application.targetFrameRate = Mathf.RoundToInt((float)currentRefreshRate);
+        //Filtramos las resoluciones
         for (int i = 0; i < resolutions.Length; i++)
         {
             if (resolutions[i].refreshRateRatio.value == currentRefreshRate)
@@ -32,17 +34,16 @@ public class ResolutionManager : MonoBehaviour
         {
             string resolutionOption = filteredResolutions[i].width + "x" + filteredResolutions[i].height;
             options.Add(resolutionOption);
-            if(filteredResolutions[i].width == Screen.width && filteredResolutions[i].height == Screen.height)
-            {
-                currentResolutionIndex = i;
-            }
         }
+
+        resolutionDropdown.AddOptions(options);
+
         if (!PlayerPrefs.HasKey("ResolutionIndex"))
         {
             Resolution maxResolution = resolutions[resolutions.Length - 1];
             Screen.SetResolution(maxResolution.width, maxResolution.height, FullScreenMode.FullScreenWindow);
-            resolutionDropdown.value = filteredResolutions.Count - 1;
-            PlayerPrefs.SetInt("ResolutionIndex", filteredResolutions.Count - 1);
+            resolutionDropdown.value = 0;
+            PlayerPrefs.SetInt("ResolutionIndex", 0);
         }
         else
         {
@@ -50,7 +51,6 @@ public class ResolutionManager : MonoBehaviour
             setResolution(savedResolutionIndex);
             resolutionDropdown.value = savedResolutionIndex;
         }
-        resolutionDropdown.AddOptions(options);
         resolutionDropdown.RefreshShownValue();
     }
 
